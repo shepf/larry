@@ -55,7 +55,14 @@ func (p Provider) GetContentToPublish() (*domain.Content, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if r == nil {
+		log.Printf("GetContentToPublish fail，")
+		return nil, err
+	}
+
 	return p.getContent(r), nil
+
 }
 
 func (p Provider) getRepositories(randomChar string) ([]*github.Repository, int, error) {
@@ -70,10 +77,10 @@ func (p Provider) getRepositories(randomChar string) ([]*github.Repository, int,
 	return nil, t.LastPage, nil
 }
 
+//if rand.Intn(11) > 2 {
+//	return emptyChar
+//}
 func (p Provider) getRandomChar() string {
-	if rand.Intn(11) > 2 {
-		return emptyChar
-	}
 
 	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
@@ -81,6 +88,8 @@ func (p Provider) getRandomChar() string {
 }
 
 func (p Provider) getRepo() (*github.Repository, error) {
+	log.Printf("getRepo start，开始获取仓库")
+
 	rand.Seed(time.Now().UTC().UnixNano())
 	rc := p.getRandomChar()
 
@@ -97,6 +106,7 @@ func (p Provider) getRepo() (*github.Repository, error) {
 	var repo *github.Repository
 
 	var found bool
+	var count int64 = 0
 
 	for !found {
 		randPos := rand.Intn(total)
@@ -106,10 +116,21 @@ func (p Provider) getRepo() (*github.Repository, error) {
 		found = repo != nil && p.isRepoNotInCache(*repo.ID)
 
 		if found && *repo.Archived {
+			log.Printf("repository archived, %s", *repo.ID)
 			found = false
 			log.Print("repository archived")
 			log.Print(*repo.ID)
 		}
+
+		//我们只要 star 大于等于 x 的 仓库
+		if found && *repo.StargazersCount < 10 {
+			count += 1
+			log.Printf("repository star < 10, %s ,%d", *repo.ID, count)
+			found = false
+			log.Print("repository star < 10")
+			log.Print(*repo.ID)
+		}
+
 	}
 
 	return repo, nil
@@ -142,7 +163,14 @@ func (p Provider) getSpecificRepo(randomChar string, pos int) *github.Repository
 		return nil
 	}
 
+	if len(repositories.Repositories) == 0 {
+		println(`这是个空数组`)
+		//log.Fatalf("repositories:  %v", repositories)
+		return nil
+	}
+
 	return repositories.Repositories[0]
+
 }
 
 func (p Provider) isRepoNotInCache(repoID int64) bool {
@@ -165,17 +193,26 @@ func (p Provider) isRepoNotInCache(repoID int64) bool {
 	return false
 }
 
+//从仓库拿取指定信息到 自定义 Content结构
 func (p Provider) getContent(repo *github.Repository) *domain.Content {
+	log.Println("getContent start: repo.Name: ", repo.Name)
+
 	c := domain.Content{Title: repo.Name, Subtitle: repo.Description, URL: repo.HTMLURL, ExtraData: []string{}}
 
-	if p.Config.TweetLanguage && repo.Language != nil {
-		l := "Lang: " + *repo.Language
+	if p.Config.ShowLanguage && repo.Language != nil {
+		l := "项目语言: " + *repo.Language
+		log.Println(l)
 		c.ExtraData = append(c.ExtraData, l)
 	}
 
 	if repo.StargazersCount != nil {
-		stargazers := "⭐️ " + strconv.Itoa(*repo.StargazersCount)
+		stargazers := "⭐️star数:" + strconv.Itoa(*repo.StargazersCount)
 		c.ExtraData = append(c.ExtraData, stargazers)
+	}
+
+	if repo.ForksCount != nil {
+		forks := "✨️Fork数:" + strconv.Itoa(*repo.ForksCount)
+		c.ExtraData = append(c.ExtraData, forks)
 	}
 
 	owner := p.getRepoUser(repo.Owner)

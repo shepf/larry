@@ -6,3 +6,5 @@ GobotTweet
 bin/
 coverage.out
 .env
+cookie.txt
+.idea

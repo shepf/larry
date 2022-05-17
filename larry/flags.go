@@ -29,6 +29,13 @@ func GetFlags(cfg *cfg.Config) []cli.Flag {
 			Usage:       "periodicity of tweet in minutes",
 			Destination: &cfg.Periodicity,
 		},
+		&cli.StringFlag{
+			Name:        "cron",
+			Aliases:     []string{"c"},
+			Value:       "", //默认每天早上7点发一条 --cron="0 0 7 * * ?"
+			Usage:       "cron expressions",
+			Destination: &cfg.Cron,
+		},
 		&cli.IntFlag{
 			Name:        "cache",
 			Aliases:     []string{"r"},
@@ -44,11 +51,11 @@ func GetFlags(cfg *cfg.Config) []cli.Flag {
 			Destination: &cfg.Hashtags,
 		},
 		&cli.BoolFlag{
-			Name:        "tweet-language",
+			Name:        "show-language",
 			Aliases:     []string{"tl"},
 			Value:       false,
-			Usage:       "bool for allowing twetting the language of the repo",
-			Destination: &cfg.TweetLanguage,
+			Usage:       "bool for allowing show the language of the repo",
+			Destination: &cfg.ShowLanguage,
 		},
 		&cli.BoolFlag{
 			Name:        "safe-mode",

@@ -263,13 +263,13 @@ func TestGetContent(t *testing.T) {
 		},
 		{
 			Name:        "Test with repo data and no hashtags",
-			mockConfig:  config.Config{TweetLanguage: true},
+			mockConfig:  config.Config{ShowLanguage: true},
 			repo:        &github.Repository{Name: &name, Description: &desc, Language: &lang, HTMLURL: &url},
 			returnValue: &domain.Content{Title: &name, Subtitle: &desc, URL: &url, ExtraData: []string{"Lang: g", "#g "}},
 		},
 		{
 			Name:       "Test full with username",
-			mockConfig: config.Config{TweetLanguage: true},
+			mockConfig: config.Config{ShowLanguage: true},
 			userClient: mock.UserClientMock{
 				GetFn: func(ctx context.Context, user string) (*github.User, *github.Response, error) {
 					t := "twitterusername"

@@ -7,15 +7,16 @@ import (
 
 // Config is a struct that contains configuration for the app
 type Config struct {
-	Language      string
-	Topic         string
-	Periodicity   int
-	Hashtags      string
-	CacheSize     int
-	TweetLanguage bool
-	SafeMode      bool
-	Provider      string
-	Publishers    string
+	Language     string
+	Topic        string
+	Periodicity  int
+	Cron         string
+	Hashtags     string
+	CacheSize    int
+	ShowLanguage bool
+	SafeMode     bool
+	Provider     string
+	Publishers   string
 }
 
 // GetHashtags return a list of hashtags from a comma separated string

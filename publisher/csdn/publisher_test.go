@@ -1,21 +1,26 @@
-package twitter
+package csdn
 
 import (
-	"testing"
-
 	"github.com/ezeoleaf/larry/config"
 	"github.com/ezeoleaf/larry/domain"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"testing"
 )
 
 func TestNewPublisher(t *testing.T) {
-	c := config.Config{SafeMode: true}
-	ak := AccessKeys{}
-
-	p := NewPublisher(ak, c)
-
-	if p.Client == nil {
-		t.Error("expected new publisher, got nil")
+	res, err := http.Get("http://www.csdn.com")
+	if err != nil {
+		log.Fatal(err)
 	}
+	//利用ioutil包读取服务器返回的数据
+	data, err := ioutil.ReadAll(res.Body)
+	res.Body.Close() //一定要记得关闭连接
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("%s", data)
 }
 
 func TestPublishContentInSafeMode(t *testing.T) {
